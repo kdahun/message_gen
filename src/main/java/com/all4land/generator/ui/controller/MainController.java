@@ -62,8 +62,10 @@ public class MainController {
 		com.all4land.generator.ui.view.panel.RightPanel rightPanel = mainFrame.getRightPanel();
 		
 		// Add Vessel 버튼: 테이블에 새 행 추가
+		// Entity는 MmsiDataService에서 앱 시작 시 이미 모두 생성되어 있음
 		leftPanel.getBtnAddVessl().addActionListener(e -> {
 			String selectedMmsi = generateRandomMmsi();
+			
 			Object[] newRow = {
 				selectedMmsi,          // MMSI: final.json에서 랜덤 선택
 				Boolean.FALSE,         // AIS
@@ -73,7 +75,7 @@ public class MainController {
 			leftPanel.getMmsiTableModel().addRow(newRow);
 			// Set에도 추가 (O(1) 중복 검사를 위해)
 			currentTableMmsis.add(selectedMmsi);
-			log.debug("새 vessel 행 추가됨: MMSI={}", selectedMmsi);
+			log.debug("새 vessel 행 추가됨: MMSI={} (Entity는 이미 생성되어 있음)", selectedMmsi);
 		});
 		
 		// Delete 버튼: 선택된 행 삭제

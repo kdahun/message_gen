@@ -1,13 +1,18 @@
 package com.all4land.generator.ui.view.panel;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.util.List;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
+
+import com.all4land.generator.ui.entity.VesselSettingsEntity;
 
 /**
  * 우측 패널 - TDMA 프레임 테이블들을 탭으로 구성
@@ -29,8 +34,18 @@ public class RightPanel extends JPanel {
 		initComponents();
 	}
 	
+	/**
+	 * Entity 리스트를 SettingsPanel에 설정
+	 * @param vesselSettingsList Entity 리스트
+	 */
+	public void setVesselSettingsList(List<VesselSettingsEntity> vesselSettingsList) {
+		if (settingsPanel != null) {
+			settingsPanel.setVesselSettingsList(vesselSettingsList);
+		}
+	}
+	
 	private void initComponents() {
-		setLayout(new java.awt.BorderLayout());
+		setLayout(new BorderLayout());
 		
 		// Settings 패널 생성
 		settingsPanel = new SettingsPanel();
@@ -48,17 +63,17 @@ public class RightPanel extends JPanel {
 		frameTabbedPane.addTab("Current Frame - Upper", upperPanel);
 		frameTabbedPane.addTab("Current Frame - Lower", lowerScrollPane);
 		
-		add(frameTabbedPane, java.awt.BorderLayout.CENTER);
+		add(frameTabbedPane, BorderLayout.CENTER);
 	}
 	
 	/**
 	 * Upper 패널 생성 (A/B 채널)
 	 */
 	private JPanel createUpperPanel() {
-		JPanel upperPanel = new JPanel(new java.awt.BorderLayout());
+		JPanel upperPanel = new JPanel(new BorderLayout());
 		
 		// A 채널 패널
-		JPanel upperAPanel = new JPanel(new java.awt.BorderLayout());
+		JPanel upperAPanel = new JPanel(new BorderLayout());
 		JLabel upperALabel = new JLabel("A Channel Slot Map");
 		upperALabel.setHorizontalAlignment(JLabel.CENTER);
 		upperALabel.setBackground(new Color(50, 50, 50));
@@ -66,11 +81,11 @@ public class RightPanel extends JPanel {
 		upperALabel.setForeground(Color.WHITE);
 		JScrollPane upperAScrollPane = new JScrollPane(currentFrameTableUpperA);
 		upperAScrollPane.setMinimumSize(new Dimension(400, 200));
-		upperAPanel.add(upperALabel, java.awt.BorderLayout.NORTH);
-		upperAPanel.add(upperAScrollPane, java.awt.BorderLayout.CENTER);
+		upperAPanel.add(upperALabel, BorderLayout.NORTH);
+		upperAPanel.add(upperAScrollPane, BorderLayout.CENTER);
 		
 		// B 채널 패널
-		JPanel upperBPanel = new JPanel(new java.awt.BorderLayout());
+		JPanel upperBPanel = new JPanel(new BorderLayout());
 		JLabel upperBLabel = new JLabel("B Channel Slot Map");
 		upperBLabel.setHorizontalAlignment(JLabel.CENTER);
 		upperBLabel.setBackground(new Color(50, 50, 50));
@@ -78,19 +93,19 @@ public class RightPanel extends JPanel {
 		upperBLabel.setForeground(Color.WHITE);
 		JScrollPane upperBScrollPane = new JScrollPane(currentFrameTableUpperB);
 		upperBScrollPane.setMinimumSize(new Dimension(400, 200));
-		upperBPanel.add(upperBLabel, java.awt.BorderLayout.NORTH);
-		upperBPanel.add(upperBScrollPane, java.awt.BorderLayout.CENTER);
+		upperBPanel.add(upperBLabel, BorderLayout.NORTH);
+		upperBPanel.add(upperBScrollPane, BorderLayout.CENTER);
 		
 		// A/B 채널을 위아래로 배치
-		javax.swing.JSplitPane upperSplitPane = new javax.swing.JSplitPane(
-			javax.swing.JSplitPane.VERTICAL_SPLIT, 
+		JSplitPane upperSplitPane = new JSplitPane(
+			JSplitPane.VERTICAL_SPLIT, 
 			upperAPanel, 
 			upperBPanel
 		);
 		upperSplitPane.setResizeWeight(0.5);
 		upperSplitPane.setOneTouchExpandable(true);
 		upperSplitPane.setContinuousLayout(true);
-		upperPanel.add(upperSplitPane, java.awt.BorderLayout.CENTER);
+		upperPanel.add(upperSplitPane, BorderLayout.CENTER);
 		
 		return upperPanel;
 	}

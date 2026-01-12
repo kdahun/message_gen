@@ -4,16 +4,21 @@ import java.awt.Dimension;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
+import javax.swing.GroupLayout;
+import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
+import javax.swing.WindowConstants;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import com.all4land.generator.ui.service.MmsiDataService;
 import com.all4land.generator.ui.view.panel.LeftPanel;
 import com.all4land.generator.ui.view.panel.RightPanel;
 
@@ -22,7 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
-public class MainFrame extends javax.swing.JFrame {
+public class MainFrame extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -45,15 +50,20 @@ public class MainFrame extends javax.swing.JFrame {
 	private final JTable currentFrameTableUpperB;
 	private final JTable currentFrameTableLower;
 	
+	// MmsiDataService (Entity 리스트를 가져오기 위해)
+	private final MmsiDataService mmsiDataService;
+	
 	public MainFrame(
 			@Qualifier("mmsiJTableName") JTable mmsiJTableName,
 			@Qualifier("currentFrameTableUpperA") JTable currentFrameTableUpperA,
 			@Qualifier("currentFrameTableUpperB") JTable currentFrameTableUpperB,
-			@Qualifier("currentFrameTableLower") JTable currentFrameTableLower) {
+			@Qualifier("currentFrameTableLower") JTable currentFrameTableLower,
+			MmsiDataService mmsiDataService) {
 		this.mmsiJTableName = mmsiJTableName;
 		this.currentFrameTableUpperA = currentFrameTableUpperA;
 		this.currentFrameTableUpperB = currentFrameTableUpperB;
 		this.currentFrameTableLower = currentFrameTableLower;
+		this.mmsiDataService = mmsiDataService;
 		initComponents();
 	}
 
@@ -61,7 +71,7 @@ public class MainFrame extends javax.swing.JFrame {
 	 * This method is called from within the constructor to initialize the form.
 	 */
 	private void initComponents() {
-		setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		setTitle("All4land Message Generator Application V2");
 		
 		// 최소 크기 설정
@@ -77,6 +87,9 @@ public class MainFrame extends javax.swing.JFrame {
 		// 우측 패널 생성 (테이블들을 주입받아 전달)
 		rightPanel = new RightPanel(currentFrameTableUpperA, currentFrameTableUpperB, currentFrameTableLower);
 		
+		// MmsiDataService에서 Entity 리스트를 가져와서 SettingsPanel에 설정
+		rightPanel.setVesselSettingsList(mmsiDataService.getVesselSettingsList());
+		
 		// 메인 분할 패널: 좌측 패널과 우측 패널을 수평으로 분할
 		mainSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, rightPanel);
 		mainSplitPane.setResizeWeight(0.25); // 왼쪽 25%, 오른쪽 75% 비율
@@ -84,15 +97,15 @@ public class MainFrame extends javax.swing.JFrame {
 		mainSplitPane.setContinuousLayout(true);
 		mainSplitPane.setDividerLocation(400); // 초기 분할 위치
 		
-		javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+		GroupLayout layout = new GroupLayout(getContentPane());
 		getContentPane().setLayout(layout);
 		layout.setHorizontalGroup(
-			layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-			.addComponent(mainSplitPane, javax.swing.GroupLayout.DEFAULT_SIZE, 1600, Short.MAX_VALUE)
+			layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+			.addComponent(mainSplitPane, GroupLayout.DEFAULT_SIZE, 1600, Short.MAX_VALUE)
 		);
 		layout.setVerticalGroup(
-			layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-			.addComponent(mainSplitPane, javax.swing.GroupLayout.DEFAULT_SIZE, 900, Short.MAX_VALUE)
+			layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+			.addComponent(mainSplitPane, GroupLayout.DEFAULT_SIZE, 900, Short.MAX_VALUE)
 		);
 		
 		pack();
@@ -182,12 +195,12 @@ public class MainFrame extends javax.swing.JFrame {
 		JMenuItem aboutItem = new JMenuItem("정보");
 		aboutItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0));
 		aboutItem.addActionListener(e -> {
-			javax.swing.JOptionPane.showMessageDialog(
+			JOptionPane.showMessageDialog(
 				this,
 				"All4land Message Generator Application V2\n\n" +
 				"TDMA 메시지 생성 도구",
 				"정보",
-				javax.swing.JOptionPane.INFORMATION_MESSAGE
+				JOptionPane.INFORMATION_MESSAGE
 			);
 		});
 		helpMenu.add(aboutItem);

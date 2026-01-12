@@ -1,11 +1,14 @@
 package com.all4land.generator.ui.view.panel;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.table.DefaultTableModel;
@@ -38,7 +41,7 @@ public class LeftPanel extends JPanel {
 	}
 	
 	private void initComponents() {
-		setLayout(new java.awt.BorderLayout());
+		setLayout(new BorderLayout());
 		
 		// 버튼 패널
 		JPanel buttonPanel = createButtonPanel();
@@ -54,13 +57,13 @@ public class LeftPanel extends JPanel {
 		JScrollPane logScrollPane = createLogArea();
 		
 		// 상단 패널 (버튼 + 레이블)
-		JPanel topPanel = new JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+		JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		topPanel.add(buttonPanel);
 		topPanel.add(slotNumberLabel);
 		
 		// MMSI 테이블과 로그를 수직으로 분할
-		javax.swing.JSplitPane leftSplitPane = new javax.swing.JSplitPane(
-			javax.swing.JSplitPane.VERTICAL_SPLIT, 
+		JSplitPane leftSplitPane = new JSplitPane(
+			JSplitPane.VERTICAL_SPLIT, 
 			tableScrollPane, 
 			logScrollPane
 		);
@@ -70,8 +73,8 @@ public class LeftPanel extends JPanel {
 		leftSplitPane.setDividerLocation(0.5);
 		
 		// 레이아웃 설정
-		add(topPanel, java.awt.BorderLayout.NORTH);
-		add(leftSplitPane, java.awt.BorderLayout.CENTER);
+		add(topPanel, BorderLayout.NORTH);
+		add(leftSplitPane, BorderLayout.CENTER);
 		
 		// 반응형: 최소 크기 설정
 		setMinimumSize(new Dimension(350, 0));
@@ -82,7 +85,7 @@ public class LeftPanel extends JPanel {
 	 * 버튼 패널 생성
 	 */
 	private JPanel createButtonPanel() {
-		JPanel buttonPanel = new JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 5, 5));
+		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
 		
 		btnAddVessl = new JButton("Add Vessel");
 		btnAdd6 = new JButton("Add 6");

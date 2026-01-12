@@ -1,21 +1,33 @@
 package com.all4land.generator.ui.view.panel;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.GraphicsEnvironment;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.ButtonGroup;
 import javax.swing.border.TitledBorder;
+
+import com.all4land.generator.ui.entity.VesselSettingsEntity;
 
 /**
  * Settings 패널 - AIS 기본 정보 설정
@@ -59,20 +71,28 @@ public class SettingsPanel extends JPanel {
 	// LOG 영역
 	private JTextArea logTextArea;
 	
-	// MMSI별 설정 Entity 리스트 (배열로 관리)
-	private java.util.List<com.all4land.generator.ui.entity.VesselSettingsEntity> vesselSettingsList;
+	// MMSI별 설정 Entity 리스트 (MmsiDataService에서 가져옴)
+	private List<VesselSettingsEntity> vesselSettingsList;
 	
 	// 현재 선택된 MMSI
 	private String currentMmsi;
 	
 	public SettingsPanel() {
-		// ArrayList로 초기화
-		this.vesselSettingsList = new java.util.ArrayList<>();
+		// 빈 리스트로 초기화 (나중에 MmsiDataService에서 설정)
+		this.vesselSettingsList = new ArrayList<>();
 		initComponents();
 	}
 	
+	/**
+	 * MmsiDataService에서 Entity 리스트를 가져와서 설정
+	 * @param vesselSettingsList Entity 리스트
+	 */
+	public void setVesselSettingsList(List<VesselSettingsEntity> vesselSettingsList) {
+		this.vesselSettingsList = vesselSettingsList != null ? vesselSettingsList : new ArrayList<>();
+	}
+	
 	private void initComponents() {
-		setLayout(new java.awt.BorderLayout());
+		setLayout(new BorderLayout());
 		
 		// 상단: AIS 패널
 		JPanel aisPanel = createAisPanel();
@@ -85,13 +105,13 @@ public class SettingsPanel extends JPanel {
 		JPanel saveButtonPanel = createSaveButtonPanel();
 		
 		// LOG 패널과 저장 버튼을 결합
-		JPanel bottomPanel = new JPanel(new java.awt.BorderLayout());
-		bottomPanel.add(saveButtonPanel, java.awt.BorderLayout.NORTH);
-		bottomPanel.add(logPanel, java.awt.BorderLayout.CENTER);
+		JPanel bottomPanel = new JPanel(new BorderLayout());
+		bottomPanel.add(saveButtonPanel, BorderLayout.NORTH);
+		bottomPanel.add(logPanel, BorderLayout.CENTER);
 		
 		// 전체를 수직으로 분할
-		javax.swing.JSplitPane mainSplitPane = new javax.swing.JSplitPane(
-			javax.swing.JSplitPane.VERTICAL_SPLIT,
+		JSplitPane mainSplitPane = new JSplitPane(
+			JSplitPane.VERTICAL_SPLIT,
 			aisPanel,
 			middlePanel
 		);
@@ -99,8 +119,8 @@ public class SettingsPanel extends JPanel {
 		mainSplitPane.setOneTouchExpandable(true);
 		mainSplitPane.setContinuousLayout(true);
 		
-		javax.swing.JSplitPane bottomSplitPane = new javax.swing.JSplitPane(
-			javax.swing.JSplitPane.VERTICAL_SPLIT,
+		JSplitPane bottomSplitPane = new JSplitPane(
+			JSplitPane.VERTICAL_SPLIT,
 			mainSplitPane,
 			bottomPanel
 		);
@@ -108,21 +128,21 @@ public class SettingsPanel extends JPanel {
 		bottomSplitPane.setOneTouchExpandable(true);
 		bottomSplitPane.setContinuousLayout(true);
 		
-		add(bottomSplitPane, java.awt.BorderLayout.CENTER);
+		add(bottomSplitPane, BorderLayout.CENTER);
 	}
 	
 	/**
 	 * 저장 버튼 패널 생성
 	 */
 	private JPanel createSaveButtonPanel() {
-		JPanel buttonPanel = new JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
+		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 		buttonPanel.setBackground(new Color(40, 40, 40));
 		
-		javax.swing.JButton saveButton = new javax.swing.JButton("저장");
+		JButton saveButton = new JButton("저장");
 		saveButton.setPreferredSize(new Dimension(100, 30));
 		saveButton.addActionListener(e -> saveCurrentSettings());
 		
-		javax.swing.JButton loadButton = new javax.swing.JButton("불러오기");
+		JButton loadButton = new JButton("불러오기");
 		loadButton.setPreferredSize(new Dimension(100, 30));
 		loadButton.addActionListener(e -> loadSavedSettings());
 		
@@ -136,7 +156,7 @@ public class SettingsPanel extends JPanel {
 	 * AIS 패널 생성 (메시지 1번, 5번 기본값 설정)
 	 */
 	private JPanel createAisPanel() {
-		JPanel aisPanel = new JPanel(new java.awt.BorderLayout());
+		JPanel aisPanel = new JPanel(new BorderLayout());
 		aisPanel.setBorder(BorderFactory.createTitledBorder(
 			BorderFactory.createLineBorder(new Color(50, 50, 50), 2),
 			"AIS",
@@ -283,7 +303,7 @@ public class SettingsPanel extends JPanel {
 		gbc.gridx = 1;
 		contentPanel.add(msg5Draft, gbc);
 		
-		aisPanel.add(contentPanel, java.awt.BorderLayout.CENTER);
+		aisPanel.add(contentPanel, BorderLayout.CENTER);
 		return aisPanel;
 	}
 	
@@ -291,7 +311,7 @@ public class SettingsPanel extends JPanel {
 	 * 중간 패널 생성 (VDE 왼쪽, ASM 오른쪽)
 	 */
 	private JPanel createMiddlePanel() {
-		JPanel middlePanel = new JPanel(new java.awt.BorderLayout());
+		JPanel middlePanel = new JPanel(new BorderLayout());
 		
 		// VDE 패널
 		JPanel vdePanel = createVdePanel();
@@ -300,8 +320,8 @@ public class SettingsPanel extends JPanel {
 		JPanel asmPanel = createAsmPanel();
 		
 		// VDE와 ASM을 수평으로 분할
-		javax.swing.JSplitPane middleSplitPane = new javax.swing.JSplitPane(
-			javax.swing.JSplitPane.HORIZONTAL_SPLIT,
+		JSplitPane middleSplitPane = new JSplitPane(
+			JSplitPane.HORIZONTAL_SPLIT,
 			vdePanel,
 			asmPanel
 		);
@@ -309,7 +329,7 @@ public class SettingsPanel extends JPanel {
 		middleSplitPane.setOneTouchExpandable(true);
 		middleSplitPane.setContinuousLayout(true);
 		
-		middlePanel.add(middleSplitPane, java.awt.BorderLayout.CENTER);
+		middlePanel.add(middleSplitPane, BorderLayout.CENTER);
 		return middlePanel;
 	}
 	
@@ -317,7 +337,7 @@ public class SettingsPanel extends JPanel {
 	 * VDE 패널 생성
 	 */
 	private JPanel createVdePanel() {
-		JPanel vdePanel = new JPanel(new java.awt.BorderLayout());
+		JPanel vdePanel = new JPanel(new BorderLayout());
 		vdePanel.setBorder(BorderFactory.createTitledBorder(
 			BorderFactory.createLineBorder(new Color(50, 50, 50), 2),
 			"VDE",
@@ -374,7 +394,7 @@ public class SettingsPanel extends JPanel {
 			vdeVesselComboBox.setEnabled(!vdeBroadcast.isSelected());
 		});
 		
-		vdePanel.add(contentPanel, java.awt.BorderLayout.CENTER);
+		vdePanel.add(contentPanel, BorderLayout.CENTER);
 		return vdePanel;
 	}
 	
@@ -382,7 +402,7 @@ public class SettingsPanel extends JPanel {
 	 * ASM 패널 생성
 	 */
 	private JPanel createAsmPanel() {
-		JPanel asmPanel = new JPanel(new java.awt.BorderLayout());
+		JPanel asmPanel = new JPanel(new BorderLayout());
 		asmPanel.setBorder(BorderFactory.createTitledBorder(
 			BorderFactory.createLineBorder(new Color(50, 50, 50), 2),
 			"ASM",
@@ -439,7 +459,7 @@ public class SettingsPanel extends JPanel {
 			asmVesselComboBox.setEnabled(!asmBroadcast.isSelected());
 		});
 		
-		asmPanel.add(contentPanel, java.awt.BorderLayout.CENTER);
+		asmPanel.add(contentPanel, BorderLayout.CENTER);
 		return asmPanel;
 	}
 	
@@ -447,7 +467,7 @@ public class SettingsPanel extends JPanel {
 	 * LOG 패널 생성
 	 */
 	private JPanel createLogPanel() {
-		JPanel logPanel = new JPanel(new java.awt.BorderLayout());
+		JPanel logPanel = new JPanel(new BorderLayout());
 		logPanel.setBorder(BorderFactory.createTitledBorder(
 			BorderFactory.createLineBorder(new Color(50, 50, 50), 2),
 			"LOG",
@@ -464,21 +484,21 @@ public class SettingsPanel extends JPanel {
 		logTextArea.setForeground(Color.LIGHT_GRAY);
 		
 		// 한글을 지원하는 폰트 설정 (Windows: Malgun Gothic, Linux/Mac: 시스템 기본)
-		java.awt.Font logFont;
+		Font logFont;
 		String osName = System.getProperty("os.name").toLowerCase();
 		if (osName.contains("windows")) {
 			// Windows: 맑은 고딕 사용
-			logFont = new java.awt.Font("Malgun Gothic", java.awt.Font.PLAIN, 12);
+			logFont = new Font("Malgun Gothic", Font.PLAIN, 12);
 		} else if (osName.contains("mac")) {
 			// macOS: AppleGothic 사용
-			logFont = new java.awt.Font("AppleGothic", java.awt.Font.PLAIN, 12);
+			logFont = new Font("AppleGothic", Font.PLAIN, 12);
 		} else {
 			// Linux: 시스템 기본 폰트 사용
-			logFont = new java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.PLAIN, 12);
+			logFont = new Font(Font.MONOSPACED, Font.PLAIN, 12);
 		}
 		// 폰트가 사용 가능한지 확인하고, 없으면 시스템 기본 폰트 사용
-		String[] availableFonts = java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment()
-			.getAvailableFontFamilyNames(java.util.Locale.getDefault());
+		String[] availableFonts = GraphicsEnvironment.getLocalGraphicsEnvironment()
+			.getAvailableFontFamilyNames(Locale.getDefault());
 		boolean fontAvailable = false;
 		for (String fontName : availableFonts) {
 			if (fontName.equals(logFont.getFamily())) {
@@ -487,14 +507,14 @@ public class SettingsPanel extends JPanel {
 			}
 		}
 		if (!fontAvailable) {
-			logFont = new java.awt.Font(java.awt.Font.SANS_SERIF, java.awt.Font.PLAIN, 12);
+			logFont = new Font(Font.SANS_SERIF, Font.PLAIN, 12);
 		}
 		logTextArea.setFont(logFont);
 		
 		JScrollPane logScrollPane = new JScrollPane(logTextArea);
 		logScrollPane.setMinimumSize(new Dimension(400, 100));
 		
-		logPanel.add(logScrollPane, java.awt.BorderLayout.CENTER);
+		logPanel.add(logScrollPane, BorderLayout.CENTER);
 		return logPanel;
 	}
 	
@@ -512,7 +532,7 @@ public class SettingsPanel extends JPanel {
 	 * @param mmsi MMSI 번호
 	 * @param vesselInfo 선박 정보 맵 (final.json에서 가져온 데이터)
 	 */
-	public void setVesselInfo(String mmsi, java.util.Map<String, Object> vesselInfo) {
+	public void setVesselInfo(String mmsi, Map<String, Object> vesselInfo) {
 		if (mmsi == null || vesselInfo == null) {
 			return;
 		}
@@ -581,7 +601,7 @@ public class SettingsPanel extends JPanel {
 		currentMmsi = mmsi;
 		
 		// 저장된 Entity가 있으면 불러오기
-		com.all4land.generator.ui.entity.VesselSettingsEntity savedEntity = findEntityByMmsi(mmsi);
+		VesselSettingsEntity savedEntity = findEntityByMmsi(mmsi);
 		if (savedEntity != null) {
 			// 저장된 Entity가 있으면 모든 필드를 Entity 값으로 로드
 			loadFromEntity(savedEntity);
@@ -646,7 +666,7 @@ public class SettingsPanel extends JPanel {
 		}
 		
 		// 현재 UI 값들을 가져와서 Entity 생성
-		com.all4land.generator.ui.entity.VesselSettingsEntity entity = com.all4land.generator.ui.entity.VesselSettingsEntity.builder()
+		VesselSettingsEntity entity = VesselSettingsEntity.builder()
 			.mmsi(currentMmsi)
 			// Message 1
 			.msg1Mmsi(msg1Mmsi.getText())
@@ -675,7 +695,7 @@ public class SettingsPanel extends JPanel {
 			.build();
 		
 		// 기존 Entity가 있으면 업데이트, 없으면 추가
-		com.all4land.generator.ui.entity.VesselSettingsEntity existingEntity = findEntityByMmsi(currentMmsi);
+		VesselSettingsEntity existingEntity = findEntityByMmsi(currentMmsi);
 		if (existingEntity != null) {
 			// 기존 Entity 업데이트
 			int index = vesselSettingsList.indexOf(existingEntity);
@@ -699,7 +719,7 @@ public class SettingsPanel extends JPanel {
 			return;
 		}
 		
-		com.all4land.generator.ui.entity.VesselSettingsEntity entity = findEntityByMmsi(currentMmsi);
+		VesselSettingsEntity entity = findEntityByMmsi(currentMmsi);
 		if (entity == null) {
 			logTextArea.append(String.format("MMSI %s에 대한 저장된 설정이 없습니다.\n", currentMmsi));
 			logTextArea.setCaretPosition(logTextArea.getDocument().getLength());
@@ -714,7 +734,7 @@ public class SettingsPanel extends JPanel {
 	/**
 	 * MMSI로 Entity 찾기
 	 */
-	private com.all4land.generator.ui.entity.VesselSettingsEntity findEntityByMmsi(String mmsi) {
+	private VesselSettingsEntity findEntityByMmsi(String mmsi) {
 		return vesselSettingsList.stream()
 			.filter(entity -> entity.getMmsi() != null && entity.getMmsi().equals(mmsi))
 			.findFirst()
@@ -722,9 +742,101 @@ public class SettingsPanel extends JPanel {
 	}
 	
 	/**
+	 * JSON 정보를 기반으로 기본 Entity 생성 및 저장
+	 * Add Vessel 버튼 클릭 시 호출됨
+	 * @param mmsi MMSI 번호
+	 * @param vesselInfo JSON에서 가져온 선박 정보
+	 */
+	public void createEntityFromJson(String mmsi, Map<String, Object> vesselInfo) {
+		if (mmsi == null || mmsi.isEmpty() || vesselInfo == null) {
+			return;
+		}
+		
+		// 이미 Entity가 있으면 생성하지 않음
+		if (findEntityByMmsi(mmsi) != null) {
+			return;
+		}
+		
+		// JSON 정보를 기반으로 기본 Entity 생성
+		VesselSettingsEntity entity = VesselSettingsEntity.builder()
+			.mmsi(mmsi)
+			// Message 1 - 기본값 설정
+			.msg1Mmsi(mmsi)
+			.msg1Latitude(0.0)
+			.msg1Longitude(0.0)
+			.msg1Cog(0.0)
+			.msg1Sog(0.0)
+			.msg1Heading(0)
+			.msg1Rot(0)
+			// Message 5 - JSON 값 사용
+			.msg5Mmsi(mmsi)
+			.msg5VesselName(vesselInfo.get("name") != null ? vesselInfo.get("name").toString() : null)
+			.msg5CallSign(vesselInfo.get("call_sign") != null ? vesselInfo.get("call_sign").toString() : null)
+			.msg5Imo(vesselInfo.get("imo_number") != null && vesselInfo.get("imo_number") instanceof Number
+				? ((Number) vesselInfo.get("imo_number")).intValue() : null)
+			.msg5Length(calculateLength(vesselInfo))
+			.msg5Width(calculateWidth(vesselInfo))
+			.msg5Draft(0.0) // JSON에 없음
+			// VDE - 기본값 설정
+			.vdeVesselSelect(false)
+			.vdeSelectedVessel(null)
+			// ASM - 기본값 설정
+			.asmVesselSelect(false)
+			.asmSelectedVessel(null)
+			.build();
+		
+		// Entity 리스트에 추가
+		vesselSettingsList.add(entity);
+	}
+	
+	/**
+	 * JSON에서 Length 계산 (dim_bow + dim_stern)
+	 */
+	private Double calculateLength(Map<String, Object> vesselInfo) {
+		Object dimBowObj = vesselInfo.get("dim_bow");
+		Object dimSternObj = vesselInfo.get("dim_stern");
+		if (dimBowObj != null && dimSternObj != null) {
+			try {
+				double dimBow = dimBowObj instanceof Number 
+					? ((Number) dimBowObj).doubleValue() 
+					: Double.parseDouble(dimBowObj.toString());
+				double dimStern = dimSternObj instanceof Number 
+					? ((Number) dimSternObj).doubleValue() 
+					: Double.parseDouble(dimSternObj.toString());
+				return dimBow + dimStern;
+			} catch (NumberFormatException e) {
+				return 0.0;
+			}
+		}
+		return 0.0;
+	}
+	
+	/**
+	 * JSON에서 Width 계산 (dim_port + dim_starboard)
+	 */
+	private Double calculateWidth(Map<String, Object> vesselInfo) {
+		Object dimPortObj = vesselInfo.get("dim_port");
+		Object dimStarboardObj = vesselInfo.get("dim_starboard");
+		if (dimPortObj != null && dimStarboardObj != null) {
+			try {
+				double dimPort = dimPortObj instanceof Number 
+					? ((Number) dimPortObj).doubleValue() 
+					: Double.parseDouble(dimPortObj.toString());
+				double dimStarboard = dimStarboardObj instanceof Number 
+					? ((Number) dimStarboardObj).doubleValue() 
+					: Double.parseDouble(dimStarboardObj.toString());
+				return dimPort + dimStarboard;
+			} catch (NumberFormatException e) {
+				return 0.0;
+			}
+		}
+		return 0.0;
+	}
+	
+	/**
 	 * Entity에서 UI로 값 불러오기
 	 */
-	private void loadFromEntity(com.all4land.generator.ui.entity.VesselSettingsEntity entity) {
+	private void loadFromEntity(VesselSettingsEntity entity) {
 		// Message 1 값들 적용
 		if (entity.getMsg1Mmsi() != null) {
 			msg1Mmsi.setText(entity.getMsg1Mmsi());
@@ -803,7 +915,7 @@ public class SettingsPanel extends JPanel {
 	/**
 	 * 저장된 모든 Entity 리스트 반환
 	 */
-	public java.util.List<com.all4land.generator.ui.entity.VesselSettingsEntity> getVesselSettingsList() {
+	public List<VesselSettingsEntity> getVesselSettingsList() {
 		return vesselSettingsList;
 	}
 	
