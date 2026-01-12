@@ -12,10 +12,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
-import javax.swing.JSpinner;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.SpinnerNumberModel;
 import javax.swing.ButtonGroup;
 import javax.swing.border.TitledBorder;
 
@@ -32,21 +30,21 @@ public class SettingsPanel extends JPanel {
 	
 	// AIS 메시지 1번 필드
 	private JTextField msg1Mmsi;
-	private JSpinner msg1Latitude;
-	private JSpinner msg1Longitude;
-	private JSpinner msg1Cog;
-	private JSpinner msg1Sog;
-	private JSpinner msg1Heading;
-	private JSpinner msg1Rot;
+	private JTextField msg1Latitude;
+	private JTextField msg1Longitude;
+	private JTextField msg1Cog;
+	private JTextField msg1Sog;
+	private JTextField msg1Heading;
+	private JTextField msg1Rot;
 	
 	// AIS 메시지 5번 필드
 	private JTextField msg5Mmsi;
 	private JTextField msg5VesselName;
 	private JTextField msg5CallSign;
-	private JSpinner msg5Imo;
-	private JSpinner msg5Length;
-	private JSpinner msg5Width;
-	private JSpinner msg5Draft;
+	private JTextField msg5Imo;
+	private JTextField msg5Length;
+	private JTextField msg5Width;
+	private JTextField msg5Draft;
 	
 	// VDE 설정
 	private JRadioButton vdeVesselSelect;
@@ -176,7 +174,7 @@ public class SettingsPanel extends JPanel {
 		// Latitude
 		gbc.gridx = 2;
 		contentPanel.add(createLabel("Latitude:"), gbc);
-		msg1Latitude = new JSpinner(new SpinnerNumberModel(0.0, -90.0, 90.0, 0.0001));
+		msg1Latitude = new JTextField(10);
 		gbc.gridx = 3;
 		contentPanel.add(msg1Latitude, gbc);
 		
@@ -184,14 +182,14 @@ public class SettingsPanel extends JPanel {
 		gbc.gridy = 2;
 		gbc.gridx = 0;
 		contentPanel.add(createLabel("Longitude:"), gbc);
-		msg1Longitude = new JSpinner(new SpinnerNumberModel(0.0, -180.0, 180.0, 0.0001));
+		msg1Longitude = new JTextField(10);
 		gbc.gridx = 1;
 		contentPanel.add(msg1Longitude, gbc);
 		
 		// COG
 		gbc.gridx = 2;
 		contentPanel.add(createLabel("COG:"), gbc);
-		msg1Cog = new JSpinner(new SpinnerNumberModel(0.0, 0.0, 360.0, 0.1));
+		msg1Cog = new JTextField(10);
 		gbc.gridx = 3;
 		contentPanel.add(msg1Cog, gbc);
 		
@@ -199,14 +197,14 @@ public class SettingsPanel extends JPanel {
 		gbc.gridy = 3;
 		gbc.gridx = 0;
 		contentPanel.add(createLabel("SOG:"), gbc);
-		msg1Sog = new JSpinner(new SpinnerNumberModel(0.0, 0.0, 102.2, 0.1));
+		msg1Sog = new JTextField(10);
 		gbc.gridx = 1;
 		contentPanel.add(msg1Sog, gbc);
 		
 		// Heading
 		gbc.gridx = 2;
 		contentPanel.add(createLabel("Heading:"), gbc);
-		msg1Heading = new JSpinner(new SpinnerNumberModel(0, 0, 359, 1));
+		msg1Heading = new JTextField(10);
 		gbc.gridx = 3;
 		contentPanel.add(msg1Heading, gbc);
 		
@@ -214,7 +212,7 @@ public class SettingsPanel extends JPanel {
 		gbc.gridy = 4;
 		gbc.gridx = 0;
 		contentPanel.add(createLabel("ROT:"), gbc);
-		msg1Rot = new JSpinner(new SpinnerNumberModel(0, -128, 127, 1));
+		msg1Rot = new JTextField(10);
 		gbc.gridx = 1;
 		contentPanel.add(msg1Rot, gbc);
 		
@@ -258,10 +256,7 @@ public class SettingsPanel extends JPanel {
 		// IMO
 		gbc.gridx = 2;
 		contentPanel.add(createLabel("IMO:"), gbc);
-		msg5Imo = new JSpinner(new SpinnerNumberModel(0, 0, 9999999, 1));
-		// IMO 번호에 천 단위 구분자(쉼표) 제거
-		JSpinner.NumberEditor imoEditor = new JSpinner.NumberEditor(msg5Imo, "#");
-		msg5Imo.setEditor(imoEditor);
+		msg5Imo = new JTextField(10);
 		gbc.gridx = 3;
 		contentPanel.add(msg5Imo, gbc);
 		
@@ -269,14 +264,14 @@ public class SettingsPanel extends JPanel {
 		gbc.gridy = 9;
 		gbc.gridx = 0;
 		contentPanel.add(createLabel("Length (m):"), gbc);
-		msg5Length = new JSpinner(new SpinnerNumberModel(0.0, 0.0, 1000.0, 0.1));
+		msg5Length = new JTextField(10);
 		gbc.gridx = 1;
 		contentPanel.add(msg5Length, gbc);
 		
 		// Width
 		gbc.gridx = 2;
 		contentPanel.add(createLabel("Width (m):"), gbc);
-		msg5Width = new JSpinner(new SpinnerNumberModel(0.0, 0.0, 500.0, 0.1));
+		msg5Width = new JTextField(10);
 		gbc.gridx = 3;
 		contentPanel.add(msg5Width, gbc);
 		
@@ -284,7 +279,7 @@ public class SettingsPanel extends JPanel {
 		gbc.gridy = 10;
 		gbc.gridx = 0;
 		contentPanel.add(createLabel("Draft (m):"), gbc);
-		msg5Draft = new JSpinner(new SpinnerNumberModel(0.0, 0.0, 100.0, 0.01));
+		msg5Draft = new JTextField(10);
 		gbc.gridx = 1;
 		contentPanel.add(msg5Draft, gbc);
 		
@@ -543,15 +538,7 @@ public class SettingsPanel extends JPanel {
 		// IMO Number
 		Object imoObj = vesselInfo.get("imo_number");
 		if (imoObj != null) {
-			if (imoObj instanceof Number) {
-				msg5Imo.setValue(((Number) imoObj).intValue());
-			} else {
-				try {
-					msg5Imo.setValue(Integer.parseInt(imoObj.toString()));
-				} catch (NumberFormatException e) {
-					// 파싱 실패 시 무시
-				}
-			}
+			msg5Imo.setText(imoObj.toString());
 		}
 		
 		// Length (dim_bow + dim_stern)
@@ -566,7 +553,7 @@ public class SettingsPanel extends JPanel {
 					? ((Number) dimSternObj).doubleValue() 
 					: Double.parseDouble(dimSternObj.toString());
 				double length = dimBow + dimStern;
-				msg5Length.setValue(length);
+				msg5Length.setText(String.valueOf(length));
 			} catch (NumberFormatException e) {
 				// 파싱 실패 시 무시
 			}
@@ -584,7 +571,7 @@ public class SettingsPanel extends JPanel {
 					? ((Number) dimStarboardObj).doubleValue() 
 					: Double.parseDouble(dimStarboardObj.toString());
 				double width = dimPort + dimStarboard;
-				msg5Width.setValue(width);
+				msg5Width.setText(String.valueOf(width));
 			} catch (NumberFormatException e) {
 				// 파싱 실패 시 무시
 			}
@@ -596,11 +583,50 @@ public class SettingsPanel extends JPanel {
 		// 저장된 Entity가 있으면 불러오기
 		com.all4land.generator.ui.entity.VesselSettingsEntity savedEntity = findEntityByMmsi(mmsi);
 		if (savedEntity != null) {
+			// 저장된 Entity가 있으면 모든 필드를 Entity 값으로 로드
 			loadFromEntity(savedEntity);
 			String logMessage = String.format("MMSI %s 정보가 로드되었습니다 (저장된 설정 적용): %s", mmsi, 
 				vesselInfo.get("name") != null ? vesselInfo.get("name").toString() : "Unknown");
 			logTextArea.append(logMessage + "\n");
 		} else {
+			// 저장된 Entity가 없으면 JSON에 없는 필드들을 기본값으로 초기화
+			// Message 1 필드들 (JSON에 없음) - 기본값 0으로 초기화
+			msg1Latitude.setText("0.0");
+			msg1Longitude.setText("0.0");
+			msg1Cog.setText("0.0");
+			msg1Sog.setText("0.0");
+			msg1Heading.setText("0");
+			msg1Rot.setText("0");
+			
+			// Message 5 필드들 중 JSON에 없는 것들 - 기본값 0으로 초기화
+			msg5Draft.setText("0.0");
+			
+			// JSON에 없는 필드들도 초기화 (null 체크 후)
+			if (nameObj == null) {
+				msg5VesselName.setText("");
+			}
+			if (callSignObj == null) {
+				msg5CallSign.setText("");
+			}
+			if (imoObj == null) {
+				msg5Imo.setText("0");
+			}
+			if (dimBowObj == null || dimSternObj == null) {
+				msg5Length.setText("0.0");
+			}
+			if (dimPortObj == null || dimStarboardObj == null) {
+				msg5Width.setText("0.0");
+			}
+			
+			// VDE/ASM 설정 초기화
+			vdeBroadcast.setSelected(true);
+			vdeVesselComboBox.setEnabled(false);
+			vdeVesselComboBox.setSelectedItem(null);
+			
+			asmBroadcast.setSelected(true);
+			asmVesselComboBox.setEnabled(false);
+			asmVesselComboBox.setSelectedItem(null);
+			
 			// LOG에 정보 표시
 			String logMessage = String.format("MMSI %s 정보가 로드되었습니다: %s", mmsi, 
 				vesselInfo.get("name") != null ? vesselInfo.get("name").toString() : "Unknown");
@@ -624,20 +650,20 @@ public class SettingsPanel extends JPanel {
 			.mmsi(currentMmsi)
 			// Message 1
 			.msg1Mmsi(msg1Mmsi.getText())
-			.msg1Latitude(((Number) msg1Latitude.getValue()).doubleValue())
-			.msg1Longitude(((Number) msg1Longitude.getValue()).doubleValue())
-			.msg1Cog(((Number) msg1Cog.getValue()).doubleValue())
-			.msg1Sog(((Number) msg1Sog.getValue()).doubleValue())
-			.msg1Heading(((Number) msg1Heading.getValue()).intValue())
-			.msg1Rot(((Number) msg1Rot.getValue()).intValue())
+			.msg1Latitude(parseDouble(msg1Latitude.getText()))
+			.msg1Longitude(parseDouble(msg1Longitude.getText()))
+			.msg1Cog(parseDouble(msg1Cog.getText()))
+			.msg1Sog(parseDouble(msg1Sog.getText()))
+			.msg1Heading(parseInteger(msg1Heading.getText()))
+			.msg1Rot(parseInteger(msg1Rot.getText()))
 			// Message 5
 			.msg5Mmsi(msg5Mmsi.getText())
 			.msg5VesselName(msg5VesselName.getText())
 			.msg5CallSign(msg5CallSign.getText())
-			.msg5Imo(((Number) msg5Imo.getValue()).intValue())
-			.msg5Length(((Number) msg5Length.getValue()).doubleValue())
-			.msg5Width(((Number) msg5Width.getValue()).doubleValue())
-			.msg5Draft(((Number) msg5Draft.getValue()).doubleValue())
+			.msg5Imo(parseInteger(msg5Imo.getText()))
+			.msg5Length(parseDouble(msg5Length.getText()))
+			.msg5Width(parseDouble(msg5Width.getText()))
+			.msg5Draft(parseDouble(msg5Draft.getText()))
 			// VDE
 			.vdeVesselSelect(vdeVesselSelect.isSelected())
 			.vdeSelectedVessel(vdeVesselComboBox.getSelectedItem() != null 
@@ -704,22 +730,22 @@ public class SettingsPanel extends JPanel {
 			msg1Mmsi.setText(entity.getMsg1Mmsi());
 		}
 		if (entity.getMsg1Latitude() != null) {
-			msg1Latitude.setValue(entity.getMsg1Latitude());
+			msg1Latitude.setText(String.valueOf(entity.getMsg1Latitude()));
 		}
 		if (entity.getMsg1Longitude() != null) {
-			msg1Longitude.setValue(entity.getMsg1Longitude());
+			msg1Longitude.setText(String.valueOf(entity.getMsg1Longitude()));
 		}
 		if (entity.getMsg1Cog() != null) {
-			msg1Cog.setValue(entity.getMsg1Cog());
+			msg1Cog.setText(String.valueOf(entity.getMsg1Cog()));
 		}
 		if (entity.getMsg1Sog() != null) {
-			msg1Sog.setValue(entity.getMsg1Sog());
+			msg1Sog.setText(String.valueOf(entity.getMsg1Sog()));
 		}
 		if (entity.getMsg1Heading() != null) {
-			msg1Heading.setValue(entity.getMsg1Heading());
+			msg1Heading.setText(String.valueOf(entity.getMsg1Heading()));
 		}
 		if (entity.getMsg1Rot() != null) {
-			msg1Rot.setValue(entity.getMsg1Rot());
+			msg1Rot.setText(String.valueOf(entity.getMsg1Rot()));
 		}
 		
 		// Message 5 값들 적용
@@ -733,16 +759,16 @@ public class SettingsPanel extends JPanel {
 			msg5CallSign.setText(entity.getMsg5CallSign());
 		}
 		if (entity.getMsg5Imo() != null) {
-			msg5Imo.setValue(entity.getMsg5Imo());
+			msg5Imo.setText(String.valueOf(entity.getMsg5Imo()));
 		}
 		if (entity.getMsg5Length() != null) {
-			msg5Length.setValue(entity.getMsg5Length());
+			msg5Length.setText(String.valueOf(entity.getMsg5Length()));
 		}
 		if (entity.getMsg5Width() != null) {
-			msg5Width.setValue(entity.getMsg5Width());
+			msg5Width.setText(String.valueOf(entity.getMsg5Width()));
 		}
 		if (entity.getMsg5Draft() != null) {
-			msg5Draft.setValue(entity.getMsg5Draft());
+			msg5Draft.setText(String.valueOf(entity.getMsg5Draft()));
 		}
 		
 		// VDE 설정 적용
@@ -783,20 +809,20 @@ public class SettingsPanel extends JPanel {
 	
 	// Getter 메서드들
 	public JTextField getMsg1Mmsi() { return msg1Mmsi; }
-	public JSpinner getMsg1Latitude() { return msg1Latitude; }
-	public JSpinner getMsg1Longitude() { return msg1Longitude; }
-	public JSpinner getMsg1Cog() { return msg1Cog; }
-	public JSpinner getMsg1Sog() { return msg1Sog; }
-	public JSpinner getMsg1Heading() { return msg1Heading; }
-	public JSpinner getMsg1Rot() { return msg1Rot; }
+	public JTextField getMsg1Latitude() { return msg1Latitude; }
+	public JTextField getMsg1Longitude() { return msg1Longitude; }
+	public JTextField getMsg1Cog() { return msg1Cog; }
+	public JTextField getMsg1Sog() { return msg1Sog; }
+	public JTextField getMsg1Heading() { return msg1Heading; }
+	public JTextField getMsg1Rot() { return msg1Rot; }
 	
 	public JTextField getMsg5Mmsi() { return msg5Mmsi; }
 	public JTextField getMsg5VesselName() { return msg5VesselName; }
 	public JTextField getMsg5CallSign() { return msg5CallSign; }
-	public JSpinner getMsg5Imo() { return msg5Imo; }
-	public JSpinner getMsg5Length() { return msg5Length; }
-	public JSpinner getMsg5Width() { return msg5Width; }
-	public JSpinner getMsg5Draft() { return msg5Draft; }
+	public JTextField getMsg5Imo() { return msg5Imo; }
+	public JTextField getMsg5Length() { return msg5Length; }
+	public JTextField getMsg5Width() { return msg5Width; }
+	public JTextField getMsg5Draft() { return msg5Draft; }
 	
 	public JRadioButton getVdeVesselSelect() { return vdeVesselSelect; }
 	public JRadioButton getVdeBroadcast() { return vdeBroadcast; }
@@ -807,5 +833,33 @@ public class SettingsPanel extends JPanel {
 	public JComboBox<String> getAsmVesselComboBox() { return asmVesselComboBox; }
 	
 	public JTextArea getLogTextArea() { return logTextArea; }
+	
+	/**
+	 * 문자열을 Double로 파싱 (빈 문자열이면 null 반환)
+	 */
+	private Double parseDouble(String text) {
+		if (text == null || text.trim().isEmpty()) {
+			return null;
+		}
+		try {
+			return Double.parseDouble(text.trim());
+		} catch (NumberFormatException e) {
+			return null;
+		}
+	}
+	
+	/**
+	 * 문자열을 Integer로 파싱 (빈 문자열이면 null 반환)
+	 */
+	private Integer parseInteger(String text) {
+		if (text == null || text.trim().isEmpty()) {
+			return null;
+		}
+		try {
+			return Integer.parseInt(text.trim());
+		} catch (NumberFormatException e) {
+			return null;
+		}
+	}
 }
 
