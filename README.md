@@ -54,6 +54,7 @@ java -jar target/generator-ui-only-v2-1.0.0.jar
 - Lombok
 - FlatLaf 3.2.5 (Look and Feel)
 
+```
 TableComponent (@Configuration)
 ├─ @Bean mmsiJTableName
 ├─ @Bean currentFrameTableUpperA
@@ -66,3 +67,4 @@ MainFrame (@Component)
 ↓
 LeftPanel / RightPanel
 └─ 생성자로 테이블 주입받아 사용
+```
