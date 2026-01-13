@@ -34,6 +34,7 @@ public class VesselSettingsEntity {
 	private Double msg5Length;
 	private Double msg5Width;
 	private Double msg5Draft;
+	private Integer msg5Type;
 	
 	// VDE 설정
 	private Boolean vdeVesselSelect; // true: Vessel Select, false: Broadcast

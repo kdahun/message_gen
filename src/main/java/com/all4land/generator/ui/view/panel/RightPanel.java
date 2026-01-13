@@ -3,7 +3,6 @@ package com.all4land.generator.ui.view.panel;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.util.List;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -11,8 +10,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
-
-import com.all4land.generator.ui.entity.VesselSettingsEntity;
 
 /**
  * 우측 패널 - TDMA 프레임 테이블들을 탭으로 구성
@@ -32,16 +29,6 @@ public class RightPanel extends JPanel {
 		this.currentFrameTableUpperB = currentFrameTableUpperB;
 		this.currentFrameTableLower = currentFrameTableLower;
 		initComponents();
-	}
-	
-	/**
-	 * Entity 리스트를 SettingsPanel에 설정
-	 * @param vesselSettingsList Entity 리스트
-	 */
-	public void setVesselSettingsList(List<VesselSettingsEntity> vesselSettingsList) {
-		if (settingsPanel != null) {
-			settingsPanel.setVesselSettingsList(vesselSettingsList);
-		}
 	}
 	
 	private void initComponents() {

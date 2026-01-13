@@ -18,7 +18,6 @@ import javax.swing.WindowConstants;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import com.all4land.generator.ui.service.MmsiDataService;
 import com.all4land.generator.ui.view.panel.LeftPanel;
 import com.all4land.generator.ui.view.panel.RightPanel;
 
@@ -50,20 +49,15 @@ public class MainFrame extends JFrame {
 	private final JTable currentFrameTableUpperB;
 	private final JTable currentFrameTableLower;
 	
-	// MmsiDataService (Entity 리스트를 가져오기 위해)
-	private final MmsiDataService mmsiDataService;
-	
 	public MainFrame(
 			@Qualifier("mmsiJTableName") JTable mmsiJTableName,
 			@Qualifier("currentFrameTableUpperA") JTable currentFrameTableUpperA,
 			@Qualifier("currentFrameTableUpperB") JTable currentFrameTableUpperB,
-			@Qualifier("currentFrameTableLower") JTable currentFrameTableLower,
-			MmsiDataService mmsiDataService) {
+			@Qualifier("currentFrameTableLower") JTable currentFrameTableLower) {
 		this.mmsiJTableName = mmsiJTableName;
 		this.currentFrameTableUpperA = currentFrameTableUpperA;
 		this.currentFrameTableUpperB = currentFrameTableUpperB;
 		this.currentFrameTableLower = currentFrameTableLower;
-		this.mmsiDataService = mmsiDataService;
 		initComponents();
 	}
 
@@ -86,9 +80,6 @@ public class MainFrame extends JFrame {
 		
 		// 우측 패널 생성 (테이블들을 주입받아 전달)
 		rightPanel = new RightPanel(currentFrameTableUpperA, currentFrameTableUpperB, currentFrameTableLower);
-		
-		// MmsiDataService에서 Entity 리스트를 가져와서 SettingsPanel에 설정
-		rightPanel.setVesselSettingsList(mmsiDataService.getVesselSettingsList());
 		
 		// 메인 분할 패널: 좌측 패널과 우측 패널을 수평으로 분할
 		mainSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, rightPanel);

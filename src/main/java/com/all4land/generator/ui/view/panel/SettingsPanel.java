@@ -9,8 +9,7 @@ import java.awt.GraphicsEnvironment;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
@@ -57,7 +56,8 @@ public class SettingsPanel extends JPanel {
 	private JTextField msg5Length;
 	private JTextField msg5Width;
 	private JTextField msg5Draft;
-	
+	private JTextField msg5Type;
+
 	// VDE 설정
 	private JRadioButton vdeVesselSelect;
 	private JRadioButton vdeBroadcast;
@@ -71,24 +71,23 @@ public class SettingsPanel extends JPanel {
 	// LOG 영역
 	private JTextArea logTextArea;
 	
-	// MMSI별 설정 Entity 리스트 (MmsiDataService에서 가져옴)
-	private List<VesselSettingsEntity> vesselSettingsList;
+	// 테이블에 추가된 MMSI별 Entity Map (MainController에서 설정)
+	private Map<String, VesselSettingsEntity> tableEntityMap;
 	
 	// 현재 선택된 MMSI
 	private String currentMmsi;
 	
 	public SettingsPanel() {
-		// 빈 리스트로 초기화 (나중에 MmsiDataService에서 설정)
-		this.vesselSettingsList = new ArrayList<>();
+		this.tableEntityMap = new HashMap<>();
 		initComponents();
 	}
 	
 	/**
-	 * MmsiDataService에서 Entity 리스트를 가져와서 설정
-	 * @param vesselSettingsList Entity 리스트
+	 * 테이블에 추가된 MMSI별 Entity Map 설정
+	 * @param tableEntityMap 테이블 Entity Map
 	 */
-	public void setVesselSettingsList(List<VesselSettingsEntity> vesselSettingsList) {
-		this.vesselSettingsList = vesselSettingsList != null ? vesselSettingsList : new ArrayList<>();
+	public void setTableEntityMap(Map<String, VesselSettingsEntity> tableEntityMap) {
+		this.tableEntityMap = tableEntityMap != null ? tableEntityMap : new HashMap<>();
 	}
 	
 	private void initComponents() {
@@ -303,6 +302,13 @@ public class SettingsPanel extends JPanel {
 		gbc.gridx = 1;
 		contentPanel.add(msg5Draft, gbc);
 		
+		// Type
+		gbc.gridx = 2;
+		contentPanel.add(createLabel("Type:"), gbc);
+		msg5Type = new JTextField(10);
+		gbc.gridx = 3;
+		contentPanel.add(msg5Type, gbc);
+
 		aisPanel.add(contentPanel, BorderLayout.CENTER);
 		return aisPanel;
 	}
@@ -561,6 +567,12 @@ public class SettingsPanel extends JPanel {
 			msg5Imo.setText(imoObj.toString());
 		}
 		
+		// Type
+		Object typeObj = vesselInfo.get("type");
+		if (typeObj != null) {
+			msg5Type.setText(typeObj.toString());
+		}
+
 		// Length (dim_bow + dim_stern)
 		Object dimBowObj = vesselInfo.get("dim_bow");
 		Object dimSternObj = vesselInfo.get("dim_stern");
@@ -637,7 +649,9 @@ public class SettingsPanel extends JPanel {
 			if (dimPortObj == null || dimStarboardObj == null) {
 				msg5Width.setText("0.0");
 			}
-			
+			if (typeObj == null) {
+				msg5Type.setText("0");
+			}
 			// VDE/ASM 설정 초기화
 			vdeBroadcast.setSelected(true);
 			vdeVesselComboBox.setEnabled(false);
@@ -684,6 +698,7 @@ public class SettingsPanel extends JPanel {
 			.msg5Length(parseDouble(msg5Length.getText()))
 			.msg5Width(parseDouble(msg5Width.getText()))
 			.msg5Draft(parseDouble(msg5Draft.getText()))
+			.msg5Type(parseInteger(msg5Type.getText()))
 			// VDE
 			.vdeVesselSelect(vdeVesselSelect.isSelected())
 			.vdeSelectedVessel(vdeVesselComboBox.getSelectedItem() != null 
@@ -694,15 +709,9 @@ public class SettingsPanel extends JPanel {
 				? asmVesselComboBox.getSelectedItem().toString() : null)
 			.build();
 		
-		// 기존 Entity가 있으면 업데이트, 없으면 추가
-		VesselSettingsEntity existingEntity = findEntityByMmsi(currentMmsi);
-		if (existingEntity != null) {
-			// 기존 Entity 업데이트
-			int index = vesselSettingsList.indexOf(existingEntity);
-			vesselSettingsList.set(index, entity);
-		} else {
-			// 새 Entity 추가
-			vesselSettingsList.add(entity);
+		// 테이블 Entity Map에 저장 (O(1))
+		if (tableEntityMap != null) {
+			tableEntityMap.put(currentMmsi, entity);
 		}
 		
 		logTextArea.append(String.format("MMSI %s 설정이 저장되었습니다.\n", currentMmsi));
@@ -733,104 +742,13 @@ public class SettingsPanel extends JPanel {
 	
 	/**
 	 * MMSI로 Entity 찾기
+	 * 테이블 Entity Map에서 조회 (O(1))
 	 */
 	private VesselSettingsEntity findEntityByMmsi(String mmsi) {
-		return vesselSettingsList.stream()
-			.filter(entity -> entity.getMmsi() != null && entity.getMmsi().equals(mmsi))
-			.findFirst()
-			.orElse(null);
-	}
-	
-	/**
-	 * JSON 정보를 기반으로 기본 Entity 생성 및 저장
-	 * Add Vessel 버튼 클릭 시 호출됨
-	 * @param mmsi MMSI 번호
-	 * @param vesselInfo JSON에서 가져온 선박 정보
-	 */
-	public void createEntityFromJson(String mmsi, Map<String, Object> vesselInfo) {
-		if (mmsi == null || mmsi.isEmpty() || vesselInfo == null) {
-			return;
+		if (tableEntityMap != null) {
+			return tableEntityMap.get(mmsi);
 		}
-		
-		// 이미 Entity가 있으면 생성하지 않음
-		if (findEntityByMmsi(mmsi) != null) {
-			return;
-		}
-		
-		// JSON 정보를 기반으로 기본 Entity 생성
-		VesselSettingsEntity entity = VesselSettingsEntity.builder()
-			.mmsi(mmsi)
-			// Message 1 - 기본값 설정
-			.msg1Mmsi(mmsi)
-			.msg1Latitude(0.0)
-			.msg1Longitude(0.0)
-			.msg1Cog(0.0)
-			.msg1Sog(0.0)
-			.msg1Heading(0)
-			.msg1Rot(0)
-			// Message 5 - JSON 값 사용
-			.msg5Mmsi(mmsi)
-			.msg5VesselName(vesselInfo.get("name") != null ? vesselInfo.get("name").toString() : null)
-			.msg5CallSign(vesselInfo.get("call_sign") != null ? vesselInfo.get("call_sign").toString() : null)
-			.msg5Imo(vesselInfo.get("imo_number") != null && vesselInfo.get("imo_number") instanceof Number
-				? ((Number) vesselInfo.get("imo_number")).intValue() : null)
-			.msg5Length(calculateLength(vesselInfo))
-			.msg5Width(calculateWidth(vesselInfo))
-			.msg5Draft(0.0) // JSON에 없음
-			// VDE - 기본값 설정
-			.vdeVesselSelect(false)
-			.vdeSelectedVessel(null)
-			// ASM - 기본값 설정
-			.asmVesselSelect(false)
-			.asmSelectedVessel(null)
-			.build();
-		
-		// Entity 리스트에 추가
-		vesselSettingsList.add(entity);
-	}
-	
-	/**
-	 * JSON에서 Length 계산 (dim_bow + dim_stern)
-	 */
-	private Double calculateLength(Map<String, Object> vesselInfo) {
-		Object dimBowObj = vesselInfo.get("dim_bow");
-		Object dimSternObj = vesselInfo.get("dim_stern");
-		if (dimBowObj != null && dimSternObj != null) {
-			try {
-				double dimBow = dimBowObj instanceof Number 
-					? ((Number) dimBowObj).doubleValue() 
-					: Double.parseDouble(dimBowObj.toString());
-				double dimStern = dimSternObj instanceof Number 
-					? ((Number) dimSternObj).doubleValue() 
-					: Double.parseDouble(dimSternObj.toString());
-				return dimBow + dimStern;
-			} catch (NumberFormatException e) {
-				return 0.0;
-			}
-		}
-		return 0.0;
-	}
-	
-	/**
-	 * JSON에서 Width 계산 (dim_port + dim_starboard)
-	 */
-	private Double calculateWidth(Map<String, Object> vesselInfo) {
-		Object dimPortObj = vesselInfo.get("dim_port");
-		Object dimStarboardObj = vesselInfo.get("dim_starboard");
-		if (dimPortObj != null && dimStarboardObj != null) {
-			try {
-				double dimPort = dimPortObj instanceof Number 
-					? ((Number) dimPortObj).doubleValue() 
-					: Double.parseDouble(dimPortObj.toString());
-				double dimStarboard = dimStarboardObj instanceof Number 
-					? ((Number) dimStarboardObj).doubleValue() 
-					: Double.parseDouble(dimStarboardObj.toString());
-				return dimPort + dimStarboard;
-			} catch (NumberFormatException e) {
-				return 0.0;
-			}
-		}
-		return 0.0;
+		return null;
 	}
 	
 	/**
@@ -882,7 +800,9 @@ public class SettingsPanel extends JPanel {
 		if (entity.getMsg5Draft() != null) {
 			msg5Draft.setText(String.valueOf(entity.getMsg5Draft()));
 		}
-		
+		if (entity.getMsg5Type() != null) {
+			msg5Type.setText(String.valueOf(entity.getMsg5Type()));
+		}
 		// VDE 설정 적용
 		if (entity.getVdeVesselSelect() != null) {
 			if (entity.getVdeVesselSelect()) {
@@ -912,13 +832,6 @@ public class SettingsPanel extends JPanel {
 		}
 	}
 	
-	/**
-	 * 저장된 모든 Entity 리스트 반환
-	 */
-	public List<VesselSettingsEntity> getVesselSettingsList() {
-		return vesselSettingsList;
-	}
-	
 	// Getter 메서드들
 	public JTextField getMsg1Mmsi() { return msg1Mmsi; }
 	public JTextField getMsg1Latitude() { return msg1Latitude; }
@@ -935,7 +848,7 @@ public class SettingsPanel extends JPanel {
 	public JTextField getMsg5Length() { return msg5Length; }
 	public JTextField getMsg5Width() { return msg5Width; }
 	public JTextField getMsg5Draft() { return msg5Draft; }
-	
+	public JTextField getMsg5Type() { return msg5Type; }
 	public JRadioButton getVdeVesselSelect() { return vdeVesselSelect; }
 	public JRadioButton getVdeBroadcast() { return vdeBroadcast; }
 	public JComboBox<String> getVdeVesselComboBox() { return vdeVesselComboBox; }
