@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
@@ -27,9 +28,11 @@ public class MmsiDataService {
 	private final List<String> mmsiList;
 	private final Map<String, Object> vesselDataMap; // MMSI -> 선박 정보 맵
 	private final ObjectMapper objectMapper;
+	private final Random random;
 	
 	public MmsiDataService() {
 		this.objectMapper = new ObjectMapper();
+		this.random = new Random();
 		Map<String, Object> tempMap = loadVesselDataMap();
 		this.vesselDataMap = tempMap;
 		this.mmsiList = new ArrayList<>(tempMap.keySet());
@@ -103,15 +106,19 @@ public class MmsiDataService {
 	public VesselSettingsEntity createVesselSettingsEntity(String mmsi, Map<String, Object> vesselInfo) {
 		Map<String, Object> info = vesselInfo != null ? vesselInfo : Collections.emptyMap();
 		
+		// Heading을 먼저 생성하고, COG는 Heading과 연관되게 생성
+		Integer heading = generateRandomHeading();
+		Double cog = generateRandomCogFromHeading(heading);
+		
 		return VesselSettingsEntity.builder()
 			.mmsi(mmsi)
-			// Message 1 - 기본값
+			// Message 1 - 랜덤 값 생성
 			.msg1Mmsi(mmsi)
-			.msg1Latitude(0.0)
-			.msg1Longitude(0.0)
-			.msg1Cog(0.0)
-			.msg1Sog(0.0)
-			.msg1Heading(0)
+			.msg1Latitude(generateRandomLatitude())
+			.msg1Longitude(generateRandomLongitude())
+			.msg1Cog(cog)
+			.msg1Sog(generateRandomSog())
+			.msg1Heading(heading)
 			.msg1Rot(0)
 			// Message 5 - JSON 값 사용
 			.msg5Mmsi(mmsi)
@@ -121,7 +128,7 @@ public class MmsiDataService {
 				? ((Number) info.get("imo_number")).intValue() : null)
 			.msg5Length(calculateLength(info))
 			.msg5Width(calculateWidth(info))
-			.msg5Draft(0.0) // JSON에 없음
+			.msg5Draft(generateRandomDraft()) // 랜덤 값 생성
 			.msg5Type(info.get("type") != null && info.get("type") instanceof Number
 				? ((Number) info.get("type")).intValue() : null)
 			// VDE - 기본값
@@ -175,6 +182,64 @@ public class MmsiDataService {
 			}
 		}
 		return 0.0;
+	}
+	
+	/**
+	 * 랜덤 위도 생성 (-90.0 ~ 90.0), 소수점 4자리
+	 */
+	private Double generateRandomLatitude() {
+		double value = (-90.0 + random.nextDouble() * 180.0);
+		return Math.round(value * 10000.0) / 10000.0;
+	}
+	
+	/**
+	 * 랜덤 경도 생성 (-180.0 ~ 180.0), 소수점 4자리
+	 */
+	private Double generateRandomLongitude() {
+		double value = (-180.0 + random.nextDouble() * 360.0);
+		return Math.round(value * 10000.0) / 10000.0;
+	}
+	
+	/**
+	 * 랜덤 Heading 생성 (0 ~ 359), 정수
+	 */
+	private Integer generateRandomHeading() {
+		return random.nextInt(360);
+	}
+	
+	/**
+	 * Heading을 기준으로 COG (Course Over Ground) 생성
+	 * COG는 Heading ± 5~10도 범위 내에서 생성 (조류/바람 영향 고려)
+	 * 소수점 1자리
+	 */
+	private Double generateRandomCogFromHeading(Integer heading) {
+		// Heading ± 5~10도 범위 내에서 랜덤 차이 생성
+		double deviation = (random.nextDouble() * 10.0) - 5.0; // -5.0 ~ +5.0도
+		double cog = heading + deviation;
+		
+		// 0~360도 범위로 정규화
+		if (cog < 0) {
+			cog += 360.0;
+		} else if (cog >= 360.0) {
+			cog -= 360.0;
+		}
+		
+		return Math.round(cog * 10.0) / 10.0;
+	}
+	
+	/**
+	 * 랜덤 SOG (Speed Over Ground) 생성 (0.0 ~ 30.0 knots), 소수점 1자리
+	 */
+	private Double generateRandomSog() {
+		double value = random.nextDouble() * 30.0;
+		return Math.round(value * 10.0) / 10.0;
+	}
+	
+	/**
+	 * 랜덤 Draft 생성 (0.0 ~ 20.0 meters), 정수
+	 */
+	private Double generateRandomDraft() {
+		return (double) random.nextInt(255)/10.0; // 0 ~ 20
 	}
 }
 
